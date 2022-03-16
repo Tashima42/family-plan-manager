@@ -1,16 +1,14 @@
-import {Collection} from "./Collection";
-
 export class User {
   private username: string;
   private password: string;
   private name: string;
-  private collections: Array<Collection>;
+  private id: number;
 
-  constructor(username: string, name: string, password: string, collections: Array<Collection>) {
+  constructor(username: string, name: string, password: string, id?: number) {
     this.username = username;
     this.name = name;
     this.password = password;
-    this.collections = collections;
+    this.id = id;
   }
 
   getPassword(): string {
@@ -22,7 +20,7 @@ export class User {
   getName(): string {
     return this.name;
   }
-  getCollections(): Array<Collection> {
-    return this.collections;
+  getId(): number {
+    return this.id;
   }
 }

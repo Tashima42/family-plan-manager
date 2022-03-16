@@ -1,4 +1,4 @@
-import {IUser} from "../interfaces/IUser"
+import {User} from "../entities/User";
 export interface IUserRepository {
-  findByUsernameAndCountry(username: string, country: string): Promise<IUser>,
+  findByUsername(username: string): Promise<User>,
 }

@@ -15,11 +15,12 @@ export class SqliteDatabase {
   }
 
   async migrate(db: any): Promise<void> {
-    await createTableUser(db)
-    await createTableCoin(db)
-    await createTableCollection(db)
+    await createTableUser(db);
+    await createTableCoin(db);
+    await createTableCollection(db);
     await createTableUserCollection(db);
-    await createTableCollectionCoin(db)
+    await createTableCollectionCoin(db);
+    await createTableAuthorizationToken(db);
 
     async function createTableUser(db: any): Promise<void> {
       await db.exec(`CREATE TABLE IF NOT EXISTS user(
@@ -56,6 +57,14 @@ export class SqliteDatabase {
       FOREIGN KEY (collection_id) REFERENCES collection (id),
       FOREIGN KEY (coin_id) REFERENCES coin (id))`)
     }
+    async function createTableAuthorizationToken(db: any): Promise<void> {
+      await db.exec(`CREATE TABLE IF NOT EXISTS authorization_token(
+      id 'INTEGER' PRIMARY KEY,
+      user_id 'INTEGER' NOT NULL,
+      token 'TEXT' NOT NULL UNIQUE,
+      valid 'BOOLEAN' DEFAULT "TRUE" NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES user (id))`)
+    }
   }
 
   async populate(db: any): Promise<void> {
@@ -68,18 +77,25 @@ export class SqliteDatabase {
     async function populateTableUser(db: any) {
       await db.run(`INSERT INTO user (
         username, password, name
-      ) VALUES (?, ?, ?) `,
+      ) VALUES (?, ?, ?), (?, ?, ?)`,
         'user1@example.com',
         '$2b$10$P9PjYWou7PU.pDA3sx3DwuW1ny902LV13LVZsZGHlahuOUbsOPuBO',
-        'User One')
+        'User One',
+        'user2@example.com',
+        '$2b$10$P9PjYWou7PU.pDA3sx3DwuW1ny902LV13LVZsZGHlahuOUbsOPuBO',
+        'User Two')
     }
     async function populateTableCoin(db: any) {
       await db.run(`INSERT INTO coin (
         name, price, description
-      ) VALUES (?, ?, ?) `,
-        'Um Real',
-        '1.00',
-        'Moeda Brasileira')
+      ) VALUES (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?)`,
+        'Um Centavo', '0.01', '1 Centavo',
+        'Cinco Centavos', '0.50', '5 Centavos',
+        'Dez Centavos', '0.10', '10 Centavos',
+        'Vinte e Cinco Centavos', '0.25', '25 Centavos',
+        'Cinquenta Centavos', '0.50', '50 Centavos',
+        'Um Real', '1.00', 'Moeda Brasileira',
+      )
     }
     async function populateTableCollection(db: any) {
       await db.run(`INSERT INTO collection (
@@ -94,9 +110,14 @@ export class SqliteDatabase {
         1, 1)
     } async function populateTableCollectionCoin(db: any) {
       await db.run(`INSERT INTO collection_coin (
-        coin_id, collection_id
-      ) VALUES (?, ?) `,
-        1, 1)
+        collection_id, coin_id
+      ) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)`,
+        1, 1,
+        1, 2,
+        1, 3,
+        1, 4,
+        1, 5,
+        1, 6)
     }
   }
 }
