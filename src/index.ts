@@ -18,6 +18,7 @@ function log(req: Request, res: Response, next: NextFunction): unknown {
     query: req.query,
     body: req.body,
     url: req.url,
+    headers: req.headers,
   })
   return next()
 }
