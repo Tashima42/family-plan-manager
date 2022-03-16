@@ -9,6 +9,6 @@ const authorizationCodeRepository = new SqliteAuthorizationTokenRepository(sqlit
 
 const authorizeUserUseCase = new AuthorizeUserUseCase(authorizationCodeRepository)
 
-const authorizeUserMiddleware = new AuthorizeUserMiddleware(authorizeUserUseCase, 'oi')
+const authorizeUserMiddleware = new AuthorizeUserMiddleware(authorizeUserUseCase)
 
 export {authorizeUserMiddleware}
