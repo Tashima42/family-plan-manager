@@ -1,4 +1,4 @@
-import {AuthenticationToken} from "../entities/authentication-token";
+import {AuthorizationToken} from "../entities/AuthorizationToken";
 export interface IAuthorizationTokenRepository {
   create(authorizationCode: AuthorizationToken): Promise<AuthorizationToken>,
   disable(authorizationCode: string): Promise<Boolean>,

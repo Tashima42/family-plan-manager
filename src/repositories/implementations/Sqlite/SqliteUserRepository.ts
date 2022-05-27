@@ -17,4 +17,18 @@ export class SqliteUserRepository implements IUserRepository {
     )
     return user
   }
+  async findById(id: number): Promise<User> {
+    const db = await this.sqliteDatabase.connect()
+    const userFound = await db.get(`SELECT * FROM user WHERE id = ?;`,
+      id)
+    if (!userFound) throw {code: "RS-IS-SE-UR-001", message: "User not found"}
+    const user = new User(
+      userFound.username,
+      userFound.name,
+      userFound.password,
+      userFound.id,
+    )
+    return user
+  }
+
 }

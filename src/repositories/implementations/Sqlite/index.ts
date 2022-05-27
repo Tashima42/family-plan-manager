@@ -16,108 +16,91 @@ export class SqliteDatabase {
 
   async migrate(db: any): Promise<void> {
     await createTableUser(db);
-    await createTableCoin(db);
-    await createTableCollection(db);
-    await createTableUserCollection(db);
-    await createTableCollectionCoin(db);
+    await createTableGroup(db);
+    await createTablePayment(db);
+    await createTableUserGroup(db);
     await createTableAuthorizationToken(db);
 
     async function createTableUser(db: any): Promise<void> {
-      await db.exec(`CREATE TABLE IF NOT EXISTS user(
+      await db.exec(`CREATE TABLE IF NOT EXISTS 'user'(
       id 'INTEGER' PRIMARY KEY,
       username 'TEXT' NOT NULL UNIQUE,
       password 'TEXT' NOT NULL,
       name 'TEXT' NOT NULL)`)
     }
-    async function createTableCoin(db: any): Promise<void> {
-      await db.exec(`CREATE TABLE IF NOT EXISTS coin(
+    async function createTableGroup(db: any): Promise<void> {
+      await db.exec(`CREATE TABLE IF NOT EXISTS 'group_plan'(
       id 'INTEGER' PRIMARY KEY,
-      name 'TEXT' NOT NULL,
-      price 'TEXT',
-      description 'TEXT')`)
-    }
-    async function createTableCollection(db: any): Promise<void> {
-      await db.exec(`CREATE TABLE IF NOT EXISTS collection(
-      id 'INTEGER' PRIMARY KEY,
+      description 'TEXT',
       name 'TEXT' NOT NULL)`)
     }
-    async function createTableUserCollection(db: any): Promise<void> {
-      await db.exec(`CREATE TABLE IF NOT EXISTS user_collection(
+    async function createTablePayment(db: any): Promise<void> {
+      await db.exec(`CREATE TABLE IF NOT EXISTS 'payment'(
+      id 'INTEGER' PRIMARY KEY,
+      ammount 'TEXT' NOT NULL,
+      attachment 'TEXT',
+      payment_date 'TEXT',
+      due_date 'TEXT',
+      user_id 'INTEGER' NOT NULL,
+      group_plan_id 'INTEGER' NOT NULL,
+      description 'TEXT',
+      FOREIGN KEY (user_id) REFERENCES 'user' (id),
+      FOREIGN KEY (group_plan_id) REFERENCES 'group_plan' (id))`)
+    }
+    async function createTableUserGroup(db: any): Promise<void> {
+      await db.exec(`CREATE TABLE IF NOT EXISTS 'user_group_plan'(
       id 'INTEGER' PRIMARY KEY,
       user_id 'INTEGER' NOT NULL,
-      collection_id 'INTEGER' NOT NULL,
-      FOREIGN KEY (user_id) REFERENCES user (id),
-      FOREIGN KEY (collection_id) REFERENCES collection (id))`)
-    }
-    async function createTableCollectionCoin(db: any): Promise<void> {
-      await db.exec(`CREATE TABLE IF NOT EXISTS collection_coin(
-      id 'INTEGER' PRIMARY KEY,
-      collection_id 'INTEGER' NOT NULL,
-      coin_id 'INTEGER' NOT NULL,
-      FOREIGN KEY (collection_id) REFERENCES collection (id),
-      FOREIGN KEY (coin_id) REFERENCES coin (id))`)
+      group_plan_id 'INTEGER' NOT NULL,
+      role 'TEXT' NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES 'user' (id),
+      FOREIGN KEY (group_plan_id) REFERENCES 'group_plan' (id))`)
     }
     async function createTableAuthorizationToken(db: any): Promise<void> {
-      await db.exec(`CREATE TABLE IF NOT EXISTS authorization_token(
+      await db.exec(`CREATE TABLE IF NOT EXISTS 'authorization_token'(
       id 'INTEGER' PRIMARY KEY,
       user_id 'INTEGER' NOT NULL,
       token 'TEXT' NOT NULL UNIQUE,
       valid 'BOOLEAN' DEFAULT "TRUE" NOT NULL,
-      FOREIGN KEY (user_id) REFERENCES user (id))`)
+      FOREIGN KEY (user_id) REFERENCES 'user' (id))`)
     }
   }
 
   async populate(db: any): Promise<void> {
     await populateTableUser(db)
-    await populateTableCoin(db)
-    await populateTableCollection(db)
-    await populateTableUserCollection(db)
-    await populateTableCollectionCoin(db)
+    await populateTableGroup(db)
+    await populateTablePaymet(db)
+    await populateTableUserGroup(db)
 
     async function populateTableUser(db: any) {
-      await db.run(`INSERT INTO user (
+      await db.run(`INSERT INTO 'user'(
         username, password, name
       ) VALUES (?, ?, ?), (?, ?, ?)`,
-        'user1@example.com',
+        'jim@example.com',
         '$2b$10$P9PjYWou7PU.pDA3sx3DwuW1ny902LV13LVZsZGHlahuOUbsOPuBO',
-        'User One',
-        'user2@example.com',
+        'Jim Halpert',
+        'michael@example.com',
         '$2b$10$P9PjYWou7PU.pDA3sx3DwuW1ny902LV13LVZsZGHlahuOUbsOPuBO',
-        'User Two')
+        'Michael Scott')
     }
-    async function populateTableCoin(db: any) {
-      await db.run(`INSERT INTO coin (
-        name, price, description
-      ) VALUES (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?)`,
-        'Um Centavo', '0.01', '1 Centavo',
-        'Cinco Centavos', '0.50', '5 Centavos',
-        'Dez Centavos', '0.10', '10 Centavos',
-        'Vinte e Cinco Centavos', '0.25', '25 Centavos',
-        'Cinquenta Centavos', '0.50', '50 Centavos',
-        'Um Real', '1.00', 'Moeda Brasileira',
-      )
+    async function populateTableGroup(db: any) {
+      await db.run(`INSERT INTO 'group_plan'(
+        name, description
+      ) VALUES (?, ?)`,
+        'Directv', 'Directv + HBO Max')
     }
-    async function populateTableCollection(db: any) {
-      await db.run(`INSERT INTO collection (
-        name
-      ) VALUES (?) `,
-        'Moedas Brasileiras')
+    async function populateTablePaymet(db: any) {
+      await db.run(`INSERT INTO 'payment'(
+        ammount, attachment,  payment_date, due_date, user_id, group_plan_id, description
+      ) VALUES (?, ?, ?, ?, ?, ?, ?) `,
+        '900', null, '2022-05-26T14:10:53.311Z', '2022-05-26T14:10:53.311Z', 1, 1, 'OK')
     }
-    async function populateTableUserCollection(db: any) {
-      await db.run(`INSERT INTO user_collection (
-        user_id, collection_id
-      ) VALUES (?, ?) `,
-        1, 1)
-    } async function populateTableCollectionCoin(db: any) {
-      await db.run(`INSERT INTO collection_coin (
-        collection_id, coin_id
-      ) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)`,
-        1, 1,
-        1, 2,
-        1, 3,
-        1, 4,
-        1, 5,
-        1, 6)
+    async function populateTableUserGroup(db: any) {
+      await db.run(`INSERT INTO 'user_group_plan'(
+        user_id, group_plan_id, role
+      ) VALUES (?, ?, ?), (?, ?, ?)`,
+        1, 1, 'urn:familymanager:role:member',
+        2, 1, 'urn:familymanager:role:admin')
     }
   }
 }
