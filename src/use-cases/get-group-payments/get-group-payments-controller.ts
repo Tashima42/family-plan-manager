@@ -16,10 +16,8 @@ export class GetGroupPaymentsController {
       return response.status(200).json(payments)
     } catch (error: any) {
       console.error(error)
-      if (error.code === "UC-GUG-001")
-        return response.status(404).json({success: false, message: error.message})
-      if (error.code === "UC-GUG-002")
-        return response.status(401).json({success: false, message: error.message})
+      if (error.code)
+        return response.status(400).json({success: false, code: error.code, message: error.message})
 
       return response.status(500).json({success: false, message: "Unexpected error, contact the developers", stack: error.stack})
     }

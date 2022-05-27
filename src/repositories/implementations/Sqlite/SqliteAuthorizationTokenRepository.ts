@@ -26,7 +26,7 @@ export class SqliteAuthorizationTokenRepository implements IAuthorizationTokenRe
       WHERE token = ? AND authorization_token.valid = "TRUE";`,
       token
     )
-    if (!authorizationTokenFound) throw {code: "RS-IS-SE-AC-001", message: "Authorization code not found"}
+    if (!authorizationTokenFound) throw {code: "RS-IS-SE-AT-001", message: "Authorization code not found"}
     const user = new User(
       authorizationTokenFound.username,
       authorizationTokenFound.name,
@@ -48,7 +48,7 @@ export class SqliteAuthorizationTokenRepository implements IAuthorizationTokenRe
       0,
       code
     )
-    if (updated.changes !== 1) throw {code: "RS-IS-SE-AC-002", message: "Failed to disable authorization code"}
+    if (updated.changes !== 1) throw {code: "RS-IS-SE-AT-002", message: "Failed to disable authorization code"}
     return true
   }
 }

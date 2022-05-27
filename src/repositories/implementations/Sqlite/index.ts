@@ -2,7 +2,8 @@ import sqlite3 from "sqlite3"
 import {open} from "../../../../node_modules/sqlite/build/index"
 import path from "path"
 
-const databasePath = path.join(__dirname, '../../../../database.db')
+const databaseName = process.env.DATABASE_NAME || 'database.dev.db'
+const databasePath = path.join(__dirname, `../../../../${databaseName}`)
 
 export class SqliteDatabase {
   async connect(): Promise<any> {
@@ -32,15 +33,16 @@ export class SqliteDatabase {
       await db.exec(`CREATE TABLE IF NOT EXISTS 'group_plan'(
       id 'INTEGER' PRIMARY KEY,
       description 'TEXT',
+      total_ammount 'INTEGER',
+      due_date 'TEXT',
       name 'TEXT' NOT NULL)`)
     }
     async function createTablePayment(db: any): Promise<void> {
       await db.exec(`CREATE TABLE IF NOT EXISTS 'payment'(
       id 'INTEGER' PRIMARY KEY,
-      ammount 'TEXT' NOT NULL,
+      ammount 'INTEGER' NOT NULL,
       attachment 'TEXT',
-      payment_date 'TEXT',
-      due_date 'TEXT',
+      date 'TEXT',
       user_id 'INTEGER' NOT NULL,
       group_plan_id 'INTEGER' NOT NULL,
       description 'TEXT',
@@ -85,15 +87,15 @@ export class SqliteDatabase {
     }
     async function populateTableGroup(db: any) {
       await db.run(`INSERT INTO 'group_plan'(
-        name, description
-      ) VALUES (?, ?)`,
-        'Directv', 'Directv + HBO Max')
+        name, description, total_ammount, due_date
+      ) VALUES (?, ?, ?, ?)`,
+        'Directv', 'Directv + HBO Max', 900, '2022-05-26T14:10:53.311Z')
     }
     async function populateTablePaymet(db: any) {
       await db.run(`INSERT INTO 'payment'(
-        ammount, attachment,  payment_date, due_date, user_id, group_plan_id, description
-      ) VALUES (?, ?, ?, ?, ?, ?, ?) `,
-        '900', null, '2022-05-26T14:10:53.311Z', '2022-05-26T14:10:53.311Z', 1, 1, 'OK')
+        ammount, attachment, date, user_id, group_plan_id, description
+      ) VALUES (?, ?, ?, ?, ?, ?) `,
+        450, null, '2022-05-26T14:10:53.311Z', 1, 1, 'OK')
     }
     async function populateTableUserGroup(db: any) {
       await db.run(`INSERT INTO 'user_group_plan'(

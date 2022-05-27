@@ -3,10 +3,9 @@ import {User} from "../../entities/User";
 export interface IMakePaymentRequestDTO {
   authorizedUser: User,
   groupId: number,
-  ammount: string,
+  ammount: number,
   attachment: string,
-  paymentDate: Date,
-  dueDate: Date,
+  date: Date,
   description: string
 }
 

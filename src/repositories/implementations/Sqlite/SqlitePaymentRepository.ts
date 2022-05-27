@@ -8,12 +8,11 @@ export class SqlitePaymentRepository implements IPaymentRepository {
   async create(payment: Payment): Promise<Payment> {
     const db = await this.sqliteDatabase.connect()
     const created = await db.run(`INSERT INTO payment 
-        (ammount, attachment, payment_date, due_date, user_id, group_plan_id, description) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        (ammount, attachment, date, user_id, group_plan_id, description) 
+        VALUES (?, ?, ?, ?, ?, ?)`,
       payment.getAmmount(),
       payment.getAttachment(),
-      payment.getPaymentDate(),
-      payment.getDueDate(),
+      payment.getDate(),
       payment.getUserId(),
       payment.getGroupId(),
       payment.getDescription()
@@ -26,17 +25,16 @@ export class SqlitePaymentRepository implements IPaymentRepository {
     const db = await this.sqliteDatabase.connect()
 
     let paymentsFound = await db.all(`SELECT
-      id, ammount, attachment, payment_date, due_date, user_id, group_plan_id, description 
+      id, ammount, attachment, date, user_id, group_plan_id, description 
     FROM payment
     WHERE user_id = ?;`, userId)
-    if (!paymentsFound) throw {code: "RS-IS-SE-GR-002", message: "Payments not found"}
+    if (!paymentsFound) throw {code: "RS-IS-SE-PT-001", message: "Payments not found"}
     if (!Array.isArray(paymentsFound)) paymentsFound = [paymentsFound]
 
     const payments = paymentsFound.map((paymentFound: any) => {
       return new Payment(
         paymentFound.ammount,
-        paymentFound.payment_date,
-        paymentFound.due_date,
+        paymentFound.date,
         paymentFound.user_id,
         paymentFound.group_plan_id,
         paymentFound.description,
@@ -50,17 +48,16 @@ export class SqlitePaymentRepository implements IPaymentRepository {
     const db = await this.sqliteDatabase.connect()
 
     let paymentsFound = await db.all(`SELECT
-      id, ammount, attachment, payment_date, due_date, user_id, group_plan_id, description 
+      id, ammount, attachment, date, user_id, group_plan_id, description 
     FROM payment
     WHERE group_plan_id = ?;`, groupId)
-    if (!paymentsFound) throw {code: "RS-IS-SE-GR-002", message: "Payments not found"}
+    if (!paymentsFound) throw {code: "RS-IS-SE-PT-002", message: "Payments not found"}
     if (!Array.isArray(paymentsFound)) paymentsFound = [paymentsFound]
 
     const payments = paymentsFound.map((paymentFound: any) => {
       return new Payment(
         paymentFound.ammount,
-        paymentFound.payment_date,
-        paymentFound.due_date,
+        paymentFound.date,
         paymentFound.user_id,
         paymentFound.group_plan_id,
         paymentFound.description,

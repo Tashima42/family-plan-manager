@@ -2,6 +2,8 @@ import {IGetGroupPaymentsRequestDTO} from "./get-group-payments-request-DTO";
 import {IGetGroupPaymentsResponseDTO} from "./get-group-payments-response-DTO";
 import {IPaymentRepository} from "../../repositories/IPaymentRepository";
 import {IGroupPlanRepository} from "../../repositories/IGroupPlanRepository";
+import {Roles} from "../../entities/Roles";
+import {UserGroupPlan} from "../../entities/UserGroupPlan";
 
 export class GetGroupPaymentsUseCase {
   constructor(
@@ -12,12 +14,17 @@ export class GetGroupPaymentsUseCase {
   async execute(data: IGetGroupPaymentsRequestDTO): Promise<IGetGroupPaymentsResponseDTO> {
     const {authorizedUser, groupId} = data
 
-    const userGroupFound = await this.groupPlanRepository.findUserGroupPlanByUserId(authorizedUser.getId(), groupId)
-    if (!userGroupFound) {
-      throw {code: "", message: "User doesn't belongs to this group"}
+    let userGroupFound: UserGroupPlan = null
+    try {
+      userGroupFound = await this.groupPlanRepository.findUserGroupPlanByUserId(authorizedUser.getId(), groupId)
+    } catch (e) {
+      if (e.code !== "RS-IS-SE-GPR-001") throw e
     }
-    if (userGroupFound.getRole() !== "urn:familymanager:role:admin") {
-      throw {code: "", message: "User isn't admin in this group"}
+    if (!userGroupFound) {
+      throw {code: "UC-GGP-001", message: "Group doesn't exists or user doesn't belongs to this group"}
+    }
+    if (userGroupFound.getRole() !== Roles.admin) {
+      throw {code: "UC-GGP-002", message: "User isn't admin in this group"}
     }
 
     const payments = await this.paymentRepository.findAllByGroupId(groupId)
