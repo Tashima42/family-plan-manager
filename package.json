@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "test": "jest",
-    "start": "npm run build && node dist/index.js",
+    "start": "node dist/index.js",
     "dev": "nodemon --signal SIGTERM --exec ts-node --transpile-only src/index.ts",
     "build": "tsc --build",
     "db:migrate": "ts-node --transpile-only scripts/database.ts --migrate",
