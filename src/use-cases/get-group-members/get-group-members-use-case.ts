@@ -17,7 +17,6 @@ export class GetUserGroupPlansUseCase {
     const userGroupPlans = await this.groupRepository.findAllByGroupId(groupId)
 
     const members = userGroupPlans.map((group) => {
-      console.log(group)
       return {
         name: group.user.getName(),
         username: group.user.getUsername(),

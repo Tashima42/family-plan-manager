@@ -1,11 +1,10 @@
 import {GetUserGroupsPlansController} from "./get-user-groups-plans-controller";
-import {SqliteDatabase} from "../../repositories/implementations/Sqlite/index";
-import {SqliteGroupRepository} from "../../repositories/implementations/Sqlite/SqliteGroupPlanRepository";
 import {GetUserGroupPlansUseCase} from "./get-user-groups-plans-use-case";
+import {postgresDatabase} from "../..";
+import {PostgresGroupRepository} from "../../repositories/implementations/Postgres/PostgresGroupPlanRepository";
 
 // Instantiate repositories
-const sqliteDatabase = new SqliteDatabase()
-const groupRepository = new SqliteGroupRepository(sqliteDatabase)
+const groupRepository = new PostgresGroupRepository(postgresDatabase)
 
 // Instantiate Use Case
 const getUserGroupsPlansUseCase = new GetUserGroupPlansUseCase(groupRepository)

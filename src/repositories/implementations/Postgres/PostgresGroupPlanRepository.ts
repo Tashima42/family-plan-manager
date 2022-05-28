@@ -1,24 +1,26 @@
 import {IGroupPlanRepository} from "../../IGroupPlanRepository";
 import {GroupPlan} from "../../../entities/GroupPlan";
 import {UserGroupPlan} from "../../../entities/UserGroupPlan";
-import {SqliteDatabase} from "./index";
+import {PostgresDatabase} from "./index";
 import {Roles} from "../../../entities/Roles";
 import {User} from "../../../entities/User";
 
-export class SqliteGroupRepository implements IGroupPlanRepository {
-  constructor(private sqliteDatabase: SqliteDatabase) {}
+export class PostgresGroupRepository implements IGroupPlanRepository {
+  constructor(private postgresDatabase: PostgresDatabase) {}
 
   async create(groupPlan: GroupPlan, adminId: number): Promise<GroupPlan> {
-    const db = await this.sqliteDatabase.connect()
-    const created = await db.run(`INSERT INTO group_plan 
+    // TODO: implement transaction
+    const {rows: [created]} = await this.postgresDatabase.client.query(`INSERT INTO group_plan 
         (name, description, total_ammount, due_date) 
-        VALUES (?, ?, ?, ?)`,
-      groupPlan.getName(),
-      groupPlan.getDescription(),
-      groupPlan.getTotalAmmount(),
-      groupPlan.getDueDate().toISOString()
+        VALUES ($1, $2, $3, $4) RETURNING id`,
+      [
+        groupPlan.getName(),
+        groupPlan.getDescription(),
+        groupPlan.getTotalAmmount(),
+        groupPlan.getDueDate()
+      ]
     )
-    groupPlan.setId(created.lastID)
+    groupPlan.setId(created.id)
 
     const userGroupPlan = new UserGroupPlan(adminId, groupPlan.getId(), Roles.admin)
     await this.createUserGroupPlan(userGroupPlan)
@@ -26,18 +28,18 @@ export class SqliteGroupRepository implements IGroupPlanRepository {
     return groupPlan
   }
   async createUserGroupPlan(userGroupPlan: UserGroupPlan): Promise<UserGroupPlan> {
-    const db = await this.sqliteDatabase.connect()
-    const created = await db.run(`INSERT INTO user_group_plan (user_id, group_plan_id, role) VALUES (?, ?, ?)`,
-      userGroupPlan.getUserId(),
-      userGroupPlan.getGroupPlanId(),
-      userGroupPlan.getRole()
+    const {rows: [created]} = await this.postgresDatabase.client.query(`INSERT INTO user_group_plan (user_id, group_plan_id, role) VALUES ($1, $2, $3) RETURNING id`,
+      [
+        userGroupPlan.getUserId(),
+        userGroupPlan.getGroupPlanId(),
+        userGroupPlan.getRole()
+      ]
     )
-    userGroupPlan.setId(created.lastID)
+    userGroupPlan.setId(created.id)
     return userGroupPlan
   }
   async findUserGroupPlanByUserId(userId: number, groupId: number): Promise<UserGroupPlan> {
-    const db = await this.sqliteDatabase.connect()
-    const userGroupPlanFound = await db.get(`SELECT user_id, group_plan_id, role, id FROM user_group_plan WHERE user_id = ? AND group_plan_id = ?;`, userId, groupId)
+    const {rows: [userGroupPlanFound]} = await this.postgresDatabase.client.query(`SELECT user_id, group_plan_id, role, id FROM user_group_plan WHERE user_id = $1 AND group_plan_id = $2 LIMIT 1;`, [userId, groupId])
     if (!userGroupPlanFound) throw {code: "RS-IS-SE-GPR-001", message: "Group not found"}
     const userGroupPlan = new UserGroupPlan(
       userGroupPlanFound.user_id,
@@ -48,21 +50,19 @@ export class SqliteGroupRepository implements IGroupPlanRepository {
     return userGroupPlan
   }
   async findAllByUserId(userId: number): Promise<Array<{groupPlan: GroupPlan, userGroupPlan: UserGroupPlan}>> {
-    const db = await this.sqliteDatabase.connect()
-
-    let userGroupsFound = await db.all(`SELECT
-      user_group_plan.user_id AS user_id, 
-      group_plan.name AS group_name,
-      group_plan.description AS description, 
-      group_plan.total_ammount AS total_ammount, 
-      group_plan.due_date AS due_date, 
-      user_group_plan.role AS role,
-      group_plan.id AS group_id
-    FROM user_group_plan JOIN group_plan
-    ON user_id = ? AND user_group_plan.group_plan_id = group_plan.id;`,
-      userId)
+    const {rows: userGroupsFound} = await this.postgresDatabase.client.query(`SELECT
+      "user_group_plan".user_id AS "user_id", 
+      "group_plan".name AS group_name,
+      "group_plan".description AS description, 
+      "group_plan".total_ammount AS total_ammount, 
+      "group_plan".due_date AS due_date, 
+      "user_group_plan".role AS role,
+      "group_plan".id AS group_id
+    FROM "user_group_plan" JOIN "group_plan"
+    ON "user_group_plan".group_plan_id = "group_plan".id
+    WHERE "user_id" = $1;`,
+      [userId])
     if (!userGroupsFound) throw {code: "RS-IS-SE-GPR-002", message: "User groups not found"}
-    if (!Array.isArray(userGroupsFound)) userGroupsFound = [userGroupsFound]
 
     const userGroups = userGroupsFound.map((userGroupFound: any) => {
       return {
@@ -84,24 +84,10 @@ export class SqliteGroupRepository implements IGroupPlanRepository {
     return userGroups;
   }
   async findAllByGroupId(groupId: number): Promise<Array<{user: User, userGroupPlan: UserGroupPlan}>> {
-    const db = await this.sqliteDatabase.connect()
-
-    let userGroupsFound = await db.all(` SELECT
-      user.id AS user_id,
-      user.name AS user_name,
-      user.username AS user_username,
-      user_group_plan.role AS role,
-      user_group_plan.group_plan_id AS group_plan_id,
-      user_group_plan.id AS user_group_plan_id
-    FROM
-      user_group_plan
-      JOIN user
-    WHERE
-      user_group_plan.group_plan_id = ?
-      AND user_group_plan.user_id = user.id; `,
-      groupId)
+    const text = `SELECT u.id AS user_id, u.name AS user_name, u.username AS user_username, ugp.role AS role, ugp.group_plan_id AS group_plan_id, ugp.id AS user_group_plan_id FROM user_group_plan ugp JOIN "user" u ON u.id = ugp.user_id WHERE ugp.group_plan_id = $1;`
+    const {rows: userGroupsFound} = await this.postgresDatabase.client.query(text,
+      [groupId])
     if (!userGroupsFound) throw {code: "RS-IS-SE-GPR-003", message: "User groups not found"}
-    if (!Array.isArray(userGroupsFound)) userGroupsFound = [userGroupsFound]
 
     const userGroups = userGroupsFound.map((userGroupFound: any) => {
       return {

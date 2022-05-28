@@ -23,10 +23,10 @@ export class SqliteAuthorizationTokenRepository implements IAuthorizationTokenRe
       user.id AS userId, user.username, user.password, user.name
       FROM authorization_token
       LEFT JOIN user ON authorization_token.user_id = user.id
-      WHERE token = ? AND authorization_token.valid = "TRUE";`,
+      ON token = ? AND authorization_token.valid = "TRUE";`,
       token
     )
-    if (!authorizationTokenFound) throw {code: "RS-IS-SE-AT-001", message: "Authorization code not found"}
+    if (!authorizationTokenFound) throw {code: "RS-IS-SE-AT-001", message: "Authorization token not found"}
     const user = new User(
       authorizationTokenFound.username,
       authorizationTokenFound.name,

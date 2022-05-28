@@ -13,7 +13,6 @@ import {registerUserController} from "./use-cases/register-user";
 
 const router = Router()
 
-
 // Register routes from controllers declared on use-cases
 router.get('/', (_, res) => res.status(200).json({success: true}))
 router.post('/user/register', (req, res) => registerUserController.handle(req, res))

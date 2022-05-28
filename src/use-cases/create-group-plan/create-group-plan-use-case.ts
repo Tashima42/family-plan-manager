@@ -10,6 +10,7 @@ export class CreateGroupPlanUseCase {
 
   async execute(data: ICreateGroupPlanRequestDTO): Promise<ICreateGroupPlanResponseDTO> {
     const {authorizedUser, name, description, totalAmmount, dueDate} = data
+    console.log({authorizedUser})
 
     const newGroupPlan = new GroupPlan(name, description, totalAmmount, dueDate)
     const groupPlan = await this.groupPlanRepository.create(newGroupPlan, authorizedUser.getId())

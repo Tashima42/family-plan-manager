@@ -15,10 +15,7 @@ export class AuthorizeUserMiddleware {
     } catch (error: any) {
       console.error(error)
       if (error.code) {
-        if (error.code == "UC-AEU-001") {
-          return response.status(401).json({success: false, message: error.message})
-        }
-        if (error.code == "UC-AEU-002") {
+        if (error.code == "RS-IS-SE-AT-001") {
           return response.status(401).json({success: false, message: error.message})
         }
       }

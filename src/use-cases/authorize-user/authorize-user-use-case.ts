@@ -7,6 +7,8 @@ export class AuthorizeUserUseCase {
   async execute(token: string): Promise<User> {
     const authorizationTokenFound = await this.authorizationTokenRepository.getByToken(token)
     if (!authorizationTokenFound) throw {code: "UC-AEU-003", message: "Authorization Token not found"}
-    return authorizationTokenFound.getUser()
+    const user = authorizationTokenFound.getUser()
+    user.setPassword(undefined)
+    return user
   }
 }

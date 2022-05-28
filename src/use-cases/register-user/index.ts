@@ -1,14 +1,13 @@
 import {RegisterUserUseCase} from "./register-user-use-case";
 import {RegisterUserController} from "./register-user-controller";
 import {CryptoHelper} from "../../helpers/implementations/CryptoHelper";
-import {SqliteUserRepository} from "../../repositories/implementations/Sqlite/SqliteUserRepository";
-import {SqliteDatabase} from "../../repositories/implementations/Sqlite/index";
+import {postgresDatabase} from "../..";
+import {PostgresUserRepository} from "../../repositories/implementations/Postgres/PostgresUserRepository";
 
 // Instantiate helpers
 const cryptoHelper = new CryptoHelper()
 // Instantiate repositories
-const sqliteDatabase = new SqliteDatabase()
-const userRepository = new SqliteUserRepository(sqliteDatabase)
+const userRepository = new PostgresUserRepository(postgresDatabase)
 
 // Instantiate Use Case
 const registerUserUseCase = new RegisterUserUseCase(userRepository, cryptoHelper)

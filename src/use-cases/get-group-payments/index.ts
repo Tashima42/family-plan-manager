@@ -1,13 +1,12 @@
 import {GetGroupPaymentsController} from "./get-group-payments-controller";
-import {SqliteDatabase} from "../../repositories/implementations/Sqlite/index";
-import {SqlitePaymentRepository} from "../../repositories/implementations/Sqlite/SqlitePaymentRepository";
 import {GetGroupPaymentsUseCase} from "./get-group-payments-use-case";
-import {SqliteGroupRepository} from "../../repositories/implementations/Sqlite/SqliteGroupPlanRepository";
+import {postgresDatabase} from "../..";
+import {PostgresPaymentRepository} from "../../repositories/implementations/Postgres/PostgresPaymentRepository";
+import {PostgresGroupRepository} from "../../repositories/implementations/Postgres/PostgresGroupPlanRepository";
 
 // Instantiate repositories
-const sqliteDatabase = new SqliteDatabase()
-const paymentRepository = new SqlitePaymentRepository(sqliteDatabase)
-const groupPlanRepository = new SqliteGroupRepository(sqliteDatabase)
+const paymentRepository = new PostgresPaymentRepository(postgresDatabase)
+const groupPlanRepository = new PostgresGroupRepository(postgresDatabase)
 
 // Instantiate Use Case
 const getGroupPaymentsUseCase = new GetGroupPaymentsUseCase(paymentRepository, groupPlanRepository)

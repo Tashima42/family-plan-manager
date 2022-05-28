@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "start": "npm run build && node dist/index.js",
-    "dev": "nodemon --exec ts-node --transpile-only src/index.ts",
+    "dev": "nodemon --signal SIGTERM --exec ts-node --transpile-only src/index.ts",
     "build": "tsc --build",
     "db:migrate": "ts-node --transpile-only scripts/database.ts --migrate",
     "db:populate": "ts-node --transpile-only scripts/database.ts --populate",
@@ -19,6 +19,7 @@
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "pg": "^8.7.3",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2"
   },
@@ -28,6 +29,7 @@
     "@types/express": "^4.17.13",
     "@types/jest": "^27.4.1",
     "@types/node": "^17.0.21",
+    "@types/pg": "^8.6.5",
     "@types/sqlite3": "^3.1.8",
     "jest": "^27.5.1",
     "nodemon": "^2.0.15",

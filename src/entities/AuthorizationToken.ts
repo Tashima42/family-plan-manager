@@ -28,6 +28,9 @@ export class AuthorizationToken {
   disable(): void {
     this.valid = false;
   }
+  getId(): number {
+    return this.id
+  }
   setId(id: number): void {
     this.id = id;
   }

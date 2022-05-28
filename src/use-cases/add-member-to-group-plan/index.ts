@@ -1,13 +1,12 @@
 import {AddMemberToGroupPlanController} from "./add-member-to-group-plan-controller";
 import {AddMemberToGroupPlanUseCase} from "./add-member-to-group-plan-use-case";
-import {SqliteDatabase} from "../../repositories/implementations/Sqlite/index";
-import {SqliteGroupRepository} from "../../repositories/implementations/Sqlite/SqliteGroupPlanRepository";
-import {SqliteUserRepository} from "../../repositories/implementations/Sqlite/SqliteUserRepository";
+import {postgresDatabase} from "../..";
+import {PostgresGroupRepository} from "../../repositories/implementations/Postgres/PostgresGroupPlanRepository";
+import {PostgresUserRepository} from "../../repositories/implementations/Postgres/PostgresUserRepository";
 
 // Instantiate repositories
-const sqliteDatabase = new SqliteDatabase()
-const groupRepository = new SqliteGroupRepository(sqliteDatabase)
-const userRepository = new SqliteUserRepository(sqliteDatabase)
+const groupRepository = new PostgresGroupRepository(postgresDatabase)
+const userRepository = new PostgresUserRepository(postgresDatabase)
 
 // Instantiate Use Case
 const addMemberToGroupPlanUseCase = new AddMemberToGroupPlanUseCase(groupRepository, userRepository)

@@ -1,11 +1,10 @@
 import {GetUserPaymentsController} from "./get-user-payments-controller";
-import {SqliteDatabase} from "../../repositories/implementations/Sqlite/index";
-import {SqlitePaymentRepository} from "../../repositories/implementations/Sqlite/SqlitePaymentRepository";
 import {GetUserPaymentsUseCase} from "./get-user-payments-use-case";
+import {postgresDatabase} from "../..";
+import {PostgresPaymentRepository} from "../../repositories/implementations/Postgres/PostgresPaymentRepository";
 
 // Instantiate repositories
-const sqliteDatabase = new SqliteDatabase()
-const paymentRepository = new SqlitePaymentRepository(sqliteDatabase)
+const paymentRepository = new PostgresPaymentRepository(postgresDatabase)
 
 // Instantiate Use Case
 const getUserPaymentsUseCase = new GetUserPaymentsUseCase(paymentRepository)
